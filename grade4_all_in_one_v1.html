@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الصف الرابع | جميع الأسئلة التفاعلية (الصيغ • المقارنة • التقريب • المسائل)</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f9fafb;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --primary:#0ea5e9;
+    --accent:#22c55e;
+    --warn:#ef4444;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Tajawal", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic", "Noto Sans", sans-serif;
+    color:var(--ink);
+    background: var(--bg);
+    line-height:1.7;
+  }
+  /* transparent math-symbol watermark */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='%23000000' fill-opacity='.06' font-family='Arial' font-size='56' font-weight='700'><text x='20' y='70'>+</text><text x='140' y='70'>−</text><text x='20' y='150'>×</text><text x='140' y='150'>÷</text><text x='90' y='220'>=</text></g></svg>");
+    background-size:260px 260px; background-repeat:repeat; pointer-events:none; z-index:-1;
+  }
+  .container{max-width:1040px;margin:24px auto 120px;padding:0 16px;}
+  header{
+    background:linear-gradient(135deg,#06b6d4,#3b82f6);
+    color:#fff;padding:18px 22px;border-radius:var(--radius);
+    box-shadow:0 12px 30px rgba(59,130,246,.25);
+    text-align:center;
+  }
+  .logo{
+    width:150px; height:150px; object-fit:contain; display:block; margin:6px auto 10px;
+    background:rgba(255,255,255,.2); border-radius:20px; border:3px solid rgba(255,255,255,.35);
+  }
+  .class-badge{ display:inline-block; margin:0 auto 8px; background:rgba(255,255,255,.2); color:#fff; padding:6px 12px; border-radius:999px; font-weight:800 }
+  header h1{margin:6px 0 2px;font-weight:800;font-size: clamp(20px, 2.6vw, 28px)}
+  header p{margin:0;color:#e2e8f0}
+  .teacher-note{display:none; margin-top:8px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.15); font-weight:700}
+  .teacher-note.show{display:block}
+  .quiz{margin-top:18px;display:grid;grid-template-columns:1fr;gap:18px;}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:0 8px 24px rgba(15,23,42,.06);padding:18px;position:relative;overflow:hidden;}
+  .q-head{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:10px}
+  .q-title{font-weight:700;margin:0;font-size: clamp(18px, 2.6vw, 22px); flex:1}
+  .choices{display:grid;grid-template-columns: repeat(2, minmax(0,1fr));gap:10px;}
+  .choice{display:flex;align-items:center;gap:10px;border:2px solid #e2e8f0;padding:10px 12px;border-radius:14px;cursor:pointer;transition:.15s ease-in-out;user-select:none;background:#fff;}
+  .choice input{display:none}
+  .choice:hover{border-color:#94a3b8; transform:translateY(-1px)}
+  .choice[data-selected="true"]{border-color:var(--primary); box-shadow:0 8px 24px rgba(14,165,233,.15)}
+  .pill{min-width:32px;height:32px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:#e2e8f0;color:#0f172a;font-weight:800;}
+  .controls{position:sticky;bottom:0; inset-inline:0;background:linear-gradient(180deg, rgba(249,250,251,0) 0%, rgba(249,250,251,.9) 24%, rgba(249,250,251,1) 100%);padding:16px 0;margin-top:8px;backdrop-filter: blur(6px);}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  button{border:none; cursor:pointer;border-radius:12px; padding:12px 16px;font-weight:800; font-family:inherit;}
+  .btn-primary{ background:var(--primary); color:#fff }
+  .btn-ghost{ background:#e2e8f0; color:#0f172a }
+  .btn-sm{ padding:8px 10px; font-size:14px; border-radius:10px }
+  .icon{ margin-inline-end:6px }
+  .score{font-weight:800; color:#334155;}
+  .correct{ border-color:var(--accent) !important }
+  .wrong{ border-color:var(--warn) !important }
+  .tick{ display:none; margin-inline-start:auto; font-weight:800 }
+  .choice.correct .tick{display:inline; color:var(--accent)}
+  .choice.wrong .tick{display:inline; color:#ef4444}
+  .choice.wrong .tick::after{ content:" ✗" }
+  .mini{display:flex; gap:8px; flex-shrink:0}
+  .toast{
+    position:fixed; inset-inline-start:16px; bottom:16px; background:#16a34a; color:#fff;
+    padding:10px 12px; border-radius:12px; font-weight:800; box-shadow:0 10px 30px rgba(0,0,0,.2);
+    opacity:0; transform:translateY(12px); transition:.3s ease; z-index:9999;
+  }
+  .toast.show{opacity:1; transform:none}
+  footer{margin-top:24px; color:#64748b; text-align:center; font-weight:800; font-size:14px;}
+  .hint{color:#475569; font-weight:700; margin-top:8px; display:none}
+  .disabled{opacity:.55; pointer-events:none}
+  .sub{margin:6px 0 6px; font-weight:800; color:#1f2937}
+  .two-cols{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+  .pv-board{--b:#0f172a;display:grid;grid-template-columns: 1fr 1fr 1fr;width:min(340px, 90vw);border:3px solid var(--b);border-radius:12px;overflow:hidden;margin: 8px 0 14px;background:#fff;}
+  .pv-col{display:grid; grid-template-rows: 1fr auto}
+  .pv-head{writing-mode: vertical-rl;text-orientation: mixed;text-align:center;padding:10px 0;font-weight:700;border-left:3px solid var(--ink);}
+  .pv-col:nth-child(1) .pv-head{ background:#dbeafe } /* المئات */
+  .pv-col:nth-child(2) .pv-head{ background:#fef9c3 } /* العشرات */
+  .pv-col:nth-child(3) .pv-head{ background:#d1fae5 } /* الآحاد */
+  .pv-foot{border-top:3px solid var(--ink);padding:8px 0;text-align:center;font-size:28px;font-weight:800;background:#fff;}
+  .compare-wrap{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .cmp{display:inline-flex; gap:10px; align-items:center}
+  .cmp .num{font-weight:800; font-size:20px}
+  .ops{display:flex; gap:8px}
+  .op{border:2px solid #e2e8f0; padding:6px 10px; border-radius:10px; cursor:pointer; font-weight:800}
+  .op.sel{border-color:var(--primary); box-shadow:0 8px 24px rgba(14,165,233,.15)}
+  .op.ok{border-color:var(--accent)}
+  .op.bad{border-color:var(--warn)}
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img class="logo" src="https://a.top4top.io/p_3516g9gcp1.jpg" alt="شعار"/>
+      <div class="class-badge">الصف الرابع</div>
+      <h1>جميع أسئلة الصف الرابع – نسخة تفاعلية واحدة</h1>
+      <p>اختاري الإجابة لكل سؤال ثم اضغطي <b>تحقّق</b>. عند الخطأ لا نكشف الحل، ويمكنكِ إعادة المحاولة.</p>
+      <div id="teacherNote" class="teacher-note">وضع المعلّم/ـة: يظهر هذا الشريط فقط مع ‎?teacher=1‎.</div>
+    </header>
+
+    <section class="quiz" id="quiz"></section>
+
+    <div class="controls">
+      <div class="row">
+        <button class="btn-primary" id="check-all"><span class="icon">✅</span>تحقّق من الإجابات</button>
+        <button class="btn-ghost" id="reset-all"><span class="icon">↻</span>إعادة المحاولة</button>
+        <span class="score" id="score">النتيجة: 0 / 0</span>
+      </div>
+    </div>
+
+    <footer>ا/فاطمة هزازي . ملتقى معلمي ومعلمات الرياضيات</footer>
+  </div>
+
+  <div class="toast" id="toast">💚 شكراً لك! إجابة صحيحة — أحسنت/أحسنتِ 👏</div>
+
+<script>
+  // teacher toggle
+  const params = new URLSearchParams(location.search);
+  if (params.has('teacher')) document.getElementById('teacherNote').classList.add('show');
+
+  const A = (n)=>String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+  const Z = (s)=> (s+'').replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+  const rid = ()=> Math.random().toString(36).slice(2);
+  const toast = document.getElementById('toast');
+  const showToast = (msg)=>{ toast.textContent = msg || "💚 شكراً لك! إجابة صحيحة — أحسنت 👏"; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1600); };
+
+  // helpers
+  function buildChoices(name, options){
+    const choices = document.createElement('div'); choices.className='choices';
+    options.forEach((opt,i)=>{
+      const id=rid(); const label = document.createElement('label'); label.className='choice'; label.setAttribute('for',id);
+      const radio=document.createElement('input'); radio.type='radio'; radio.name=name; radio.value=i; radio.id=id;
+      radio.addEventListener('change',()=>{ [...choices.querySelectorAll('.choice')].forEach(c=>c.dataset.selected='false'); label.dataset.selected='true' });
+      const pill=document.createElement('span'); pill.className='pill'; pill.textContent=A(i+1);
+      const text=document.createElement('span'); text.style.fontWeight='800'; text.textContent=opt;
+      const tick=document.createElement('span'); tick.className='tick'; tick.textContent='✓';
+      label.appendChild(radio); label.appendChild(pill); label.appendChild(text); label.appendChild(tick);
+      choices.appendChild(label);
+    });
+    return choices;
+  }
+
+  // question arrays
+  const questions = [];
+
+  function addBoardDual({title, digits, wordCorrect, wordChoices, expCorrect, expChoices}){
+    const id = rid();
+    questions.push({id, kind:'boarddual', title, digits, wordCorrect, wordChoices, expCorrect, expChoices});
+  }
+  function addDualForm({title, number, wordCorrect, wordChoices, expCorrect, expChoices}){
+    const id = rid();
+    questions.push({id, kind:'dualform', title, number, wordCorrect, wordChoices, expCorrect, expChoices});
+  }
+  function addDualCustom({title, leftLabel, rightLabel, leftOptions, leftAnswer, rightOptions, rightAnswer}){
+    const id=rid();
+    questions.push({id, kind:'dualc', title, leftLabel, rightLabel, leftOptions, leftAnswer, rightOptions, rightAnswer});
+  }
+  function addMC({title, options, answer, hint}){ const id=rid(); questions.push({id, kind:'mc', title, options, answer, hint}); }
+  function addCompare({title, left, right, answer}){ const id=rid(); questions.push({id, kind:'compare', title, left, right, answer}); }
+
+  // ===== Q1–2: boards =====
+  addBoardDual({
+    title:"١) من لوحة القيمة المنزلية اكتب العدد بالصيغتين:",
+    digits:{h:9,t:9,o:5},
+    wordCorrect:"تسعمائة وخمسة وتسعون",
+    wordChoices:["تسعمائة وخمسة وتسعون","ثمانمائة وخمسة وتسعون","تسعمائة وخمسة وثمانون","تسعمائة وخمسة وتسعين"],
+    expCorrect:A(900)+" + "+A(90)+" + "+A(5),
+    expChoices:[A(900)+" + "+A(90)+" + "+A(5), A(900)+" + "+A(50)+" + "+A(9), A(500)+" + "+A(90)+" + "+A(9), A(900)+" + "+A(9)+" + "+A(50)]
+  });
+  addBoardDual({
+    title:"٢) من لوحة القيمة المنزلية اكتب العدد بالصيغتين:",
+    digits:{h:0,t:6,o:4},
+    wordCorrect:"أربعة وستون",
+    wordChoices:["أربعة وستون","ستون وأربعة","أربعون وستة","أربعة وستين"],
+    expCorrect:A(60)+" + "+A(4),
+    expChoices:[A(60)+" + "+A(4), A(40)+" + "+A(6), A(600)+" + "+A(4), A(6)+" + "+A(40)]
+  });
+
+  // ===== Q3–10 numbers =====
+  addDualForm({ title:"٣) اكتب العدد ٧٩ بالصيغتين:", number:A(79),
+    wordCorrect:"تسعة وسبعون",
+    wordChoices:["تسعة وسبعون","سبعة وتسعون","تسعون وسبعة","تسعة وسبعين"],
+    expCorrect:A(70)+" + "+A(9),
+    expChoices:[A(70)+" + "+A(9), A(90)+" + "+A(7), A(700)+" + "+A(9), A(60)+" + "+A(9)]
+  });
+  addDualForm({ title:"٤) اكتب العدد ٣٠ بالصيغتين:", number:A(30),
+    wordCorrect:"ثلاثون",
+    wordChoices:["ثلاثون","ثلاثة وعشرون","ثلاثة وثلاثون","ثلاثين"],
+    expCorrect:A(30)+" + "+A(0),
+    expChoices:[A(30)+" + "+A(0), A(3)+" × "+A(10), A(3)+" + "+A(0), A(20)+" + "+A(10)]
+  });
+  addDualForm({ title:"٥) اكتب العدد ٣٤٧ بالصيغتين:", number:A(347),
+    wordCorrect:"ثلاثمائة وسبعة وأربعون",
+    wordChoices:["ثلاثمائة وسبعة وأربعون","سبعمائة وثلاثة وأربعون","ثلاثمائة وسبعة وأربعين","ثلاثمائة وأربعة وسبعون"],
+    expCorrect:A(300)+" + "+A(40)+" + "+A(7),
+    expChoices:[A(300)+" + "+A(40)+" + "+A(7), A(300)+" + "+A(70)+" + "+A(4), A(340)+" + "+A(7), A(700)+" + "+A(30)+" + "+A(4)]
+  });
+  addDualForm({ title:"٦) اكتب العدد ٦٩٢ بالصيغتين:", number:A(692),
+    wordCorrect:"ستمائة واثنان وتسعون",
+    wordChoices:["ستمائة واثنان وتسعون","ستمائة واثنين وتسعون","ستمائة وتسعة وعشرون","ست مائة واثنان وتسعون"],
+    expCorrect:A(600)+" + "+A(90)+" + "+A(2),
+    expChoices:[A(600)+" + "+A(90)+" + "+A(2), A(600)+" + "+A(20)+" + "+A(9), A(690)+" + "+A(2), A(900)+" + "+A(60)+" + "+A(2)]
+  });
+  addDualForm({ title:"٧) اكتب العدد ٩٠ بالصيغتين:", number:A(90),
+    wordCorrect:"تسعون",
+    wordChoices:["تسعون","تسعة وعشرون","تسعين","تسعة وتسعون"],
+    expCorrect:A(90)+" + "+A(0),
+    expChoices:[A(90)+" + "+A(0), A(9)+" × "+A(10), A(9)+" + "+A(0), A(100)+" − "+A(10)]
+  });
+  addDualForm({ title:"٨) اكتب العدد ١٨٤٠ بالصيغتين:", number:A(1840),
+    wordCorrect:"ألف وثمانمائة وأربعون",
+    wordChoices:["ألف وثمانمائة وأربعون","ألف وثمانمئة وأربعون","ألف وثمانمائة وأربعين","ألف وثمانمائة وأربعة"],
+    expCorrect:A(1000)+" + "+A(800)+" + "+A(40),
+    expChoices:[A(1000)+" + "+A(800)+" + "+A(40), A(1800)+" + "+A(40), A(1000)+" + "+A(840), A(1000)+" + "+A(800)+" + "+A(4)]
+  });
+  addDualForm({ title:"٩) اكتب العدد ١٦٥ بالصيغتين:", number:A(165),
+    wordCorrect:"مائة وخمسة وستون",
+    wordChoices:["مائة وخمسة وستون","مئة وخمسة وستون","مائة وخمسة وستين","مائتان وخمسة وستون"],
+    expCorrect:A(100)+" + "+A(60)+" + "+A(5),
+    expChoices:[A(100)+" + "+A(60)+" + "+A(5), A(160)+" + "+A(5), A(100)+" + "+A(50)+" + "+A(5), A(100)+" + "+A(65)]
+  });
+  addDualForm({ title:"١٠) اكتب العدد ٤٥٠٥ بالصيغتين:", number:A(4505),
+    wordCorrect:"أربعة آلاف وخمسة",
+    wordChoices:["أربعة آلاف وخمسة","أربعة آلاف وخمسون","أربعة آلاف وخمسمائة وخمسة","أربعة آلاف وخمسمائة"],
+    expCorrect:A(4000)+" + "+A(500)+" + "+A(5),
+    expChoices:[A(4000)+" + "+A(500)+" + "+A(5), A(4000)+" + "+A(50)+" + "+A(5), A(4500)+" + "+A(5), A(4000)+" + "+A(505)]
+  });
+
+  // ===== Q11–12 =====
+  addDualCustom({
+    title:"١١) اكتبي ١ + ٢٠٠ + ٣٠٠٠ بالصيغتين: القياسية واللفظية.",
+    leftLabel:"الصيغة القياسية (العدد):",
+    rightLabel:"الصيغة اللفظية:",
+    leftOptions:["٣٢٠١","٣٠٢١","٣٢١٠","٣٢٠٠"],
+    leftAnswer:"٣٢٠١",
+    rightOptions:["ثلاثة آلاف ومائتان وواحد","ثلاثة آلاف وواحد وعشرون","ثلاثة آلاف ومائتان وعشرة","ثلاثة آلاف ومئتان وواحدة"],
+    rightAnswer:"ثلاثة آلاف ومائتان وواحد"
+  });
+  addMC({
+    title:"١٢) الجهات الرسمية: رقم الاتصال ١٩٥٥ — اكتبيه بالصيغة اللفظية.",
+    options:["ألف وتسعمائة وخمسة وخمسون","تسعمائة وخمسة وخمسون","ألف وتسعمائة وخمسة وخمسين","ألف وتسعمائة وخمسمائة وخمسة"],
+    answer:0,
+    hint:"١٩٠٠ ثم ٥٥"
+  });
+
+  // ===== Q13–16: compare =====
+  addCompare({title:"١٣) قارن: ٤ ○ ٤٠", left:4, right:40, answer:'<'});
+  addCompare({title:"١٤) قارن: ٥٩ ○ ٩", left:59, right:9, answer:'>'});
+  addCompare({title:"١٥) قارن: ٨٨٨ ○ ٩٨٨", left:888, right:988, answer:'<'});
+  addCompare({title:"١٦) قارن: ٦٨٢ ○ ٧٠٠", left:682, right:700, answer:'<'});
+
+  // ===== Q17 word problem =====
+  addMC({
+    title:"١٧) مع خالد ٤٢٥ ريالًا، إذا أراد شراء هاتف ثمنه ٣٧٥ ريالًا، فهل ما معه يكفي لشرائه؟",
+    options:["نعم، يكفي ويتبقى معه ٥٠ ريالًا","لا، ينقصه ٥٠ ريالًا","لا، ينقصه ٤٠ ريالًا","نعم، يتبقى معه ٤٠ ريالًا"],
+    answer:0,
+    hint:"احسبي ٤٢٥ − ٣٧٥."
+  });
+
+  // ===== Q18–25 rounding to nearest ten =====
+  function round10(n){ return Math.round(n/10)*10 }
+  const rounding = [26,4,18,75,152,175,347,508];
+  rounding.forEach((n,i)=>{
+    const ans = round10(n);
+    const opts = [ans, ans+10, ans-10, ans + (n%10<5?-20:20)];
+    addMC({
+      title: `${A(18+i)}) قرّبي ${A(n)} إلى أقرب عشرة.`,
+      options: opts.map(A),
+      answer: 0,
+      hint: "انظري إلى الآحاد: ٥ فأكثر تُقرب للأعلى."
+    });
+  });
+
+  // ===== Q26 measurement =====
+  addMC({
+    title:"٢٦) القياس: إذا كانت المسافة بين جدة ومكة المكرمة ٦٥ كم، فهل يعد التقريب إلى ٧٠ كم مناسبًا؟",
+    options:["نعم، لأن ٦٥ أقرب إلى ٧٠ من ٦٠","لا، لأنه أقرب إلى ٦٠","نعم، لأن الفارق عن ٧٠ يساوي ٦","لا، لأن ٦٥ لا يُقرّب"],
+    answer:0,
+    hint:"٦٥ في المنتصف وتُقرَّب للأعلى."
+  });
+
+  // ==== RENDER ====
+  const quiz = document.getElementById('quiz');
+  function cardById(id){ return document.querySelector(`[data-q='${id}']`) }
+
+  questions.forEach(q=>{
+    const card = document.createElement('article'); card.className='card'; card.dataset.q=q.id;
+    const head = document.createElement('div'); head.className='q-head';
+    const h = document.createElement('h3'); h.className='q-title'; h.textContent=q.title;
+    const mini = document.createElement('div'); mini.className='mini';
+    mini.innerHTML = `<button class="btn-ghost btn-sm" data-act="reset" data-qid="${q.id}">↻ أعد المحاولة</button>
+                      <button class="btn-primary btn-sm" data-act="check" data-qid="${q.id}">✅ تحقّق</button>`;
+    head.appendChild(h); head.appendChild(mini); card.appendChild(head);
+
+    if(q.kind==='boarddual'){
+      const pv = document.createElement('div'); pv.className='pv-board';
+      pv.innerHTML = `
+        <div class="pv-col"><div class="pv-head">المئات</div><div class="pv-foot">${A(q.digits.h)}</div></div>
+        <div class="pv-col"><div class="pv-head">العشرات</div><div class="pv-foot">${A(q.digits.t)}</div></div>
+        <div class="pv-col"><div class="pv-head">الآحاد</div><div class="pv-foot">${A(q.digits.o)}</div></div>`;
+      card.appendChild(pv);
+
+      const sub1 = document.createElement('div'); sub1.className='sub'; sub1.textContent='اختر الصيغة اللفظية الصحيحة:'; card.appendChild(sub1);
+      const wordOps = q.wordChoices.slice().sort(()=>Math.random()-0.5);
+      const word = buildChoices(q.id+'_word', wordOps); word.dataset.answer = q.wordCorrect; card.appendChild(word);
+
+      const sub2 = document.createElement('div'); sub2.className='sub'; sub2.textContent='اختر الصيغة التحليلية الصحيحة:'; card.appendChild(sub2);
+      const expOps = q.expChoices.slice().sort(()=>Math.random()-0.5);
+      const exp = buildChoices(q.id+'_exp', expOps); exp.dataset.answer = q.expCorrect; card.appendChild(exp);
+
+      const hint = document.createElement('div'); hint.className='hint'; hint.textContent='تذكّر: العدد = (مئات) + (عشرات) + (آحاد).'; card.appendChild(hint);
+    }
+
+    if(q.kind==='dualform'){
+      const info = document.createElement('div'); info.className='sub'; info.textContent='العدد: '+q.number; card.appendChild(info);
+      const sub1 = document.createElement('div'); sub1.className='sub'; sub1.textContent='اختر الصيغة اللفظية الصحيحة:'; card.appendChild(sub1);
+      const wordOps = q.wordChoices.slice().sort(()=>Math.random()-0.5);
+      const word = buildChoices(q.id+'_word', wordOps); word.dataset.answer = q.wordCorrect; card.appendChild(word);
+      const sub2 = document.createElement('div'); sub2.className='sub'; sub2.textContent='اختر الصيغة التحليلية الصحيحة:'; card.appendChild(sub2);
+      const expOps = q.expChoices.slice().sort(()=>Math.random()-0.5);
+      const exp = buildChoices(q.id+'_exp', expOps); exp.dataset.answer = q.expCorrect; card.appendChild(exp);
+    }
+
+    if(q.kind==='dualc'){
+      const l = document.createElement('div'); l.className='sub'; l.textContent=q.leftLabel; card.appendChild(l);
+      const left = buildChoices(q.id+'_L', q.leftOptions); left.dataset.answer = q.leftAnswer; card.appendChild(left);
+      const r = document.createElement('div'); r.className='sub'; r.textContent=q.rightLabel; card.appendChild(r);
+      const right = buildChoices(q.id+'_R', q.rightOptions); right.dataset.answer = q.rightAnswer; card.appendChild(right);
+    }
+
+    if(q.kind==='mc'){
+      const choices = buildChoices(q.id, q.options); choices.dataset.answer = String(q.answer); card.appendChild(choices);
+      if(q.hint){ const hint=document.createElement('div'); hint.className='hint'; hint.textContent='تلميح: '+q.hint; card.appendChild(hint); }
+    }
+
+    if(q.kind==='compare'){
+      const wrap = document.createElement('div'); wrap.className='compare-wrap';
+      const cmp = document.createElement('div'); cmp.className='cmp';
+      cmp.innerHTML = `<span class='num'>${A(q.left)}</span>`;
+      const ops = document.createElement('div'); ops.className='ops';
+      ['>','<','='].forEach(sym=>{
+        const b=document.createElement('div'); b.className='op'; b.textContent=sym; b.dataset.v=sym;
+        b.addEventListener('click',()=>{ [...ops.children].forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); });
+        ops.appendChild(b);
+      });
+      const right = document.createElement('span'); right.className='num'; right.textContent = A(q.right);
+      wrap.appendChild(cmp); wrap.appendChild(ops); wrap.appendChild(right);
+      card.appendChild(wrap);
+      const hint = document.createElement('div'); hint.className='hint'; hint.textContent='اختاري (>) أو (<) أو (=) بما يناسب.'; card.appendChild(hint);
+    }
+
+    quiz.appendChild(card);
+  });
+
+  // ===== correctness & UI logic =====
+  function cardById(id){ return document.querySelector(`[data-q='${id}']`) }
+
+  function isCorrect(q){
+    if(q.kind==='mc'){
+      const ch = cardById(q.id).querySelector(`input[name="${q.id}"]:checked`);
+      return !!(ch && Number(ch.value)===Number(q.answer));
+    }
+    if(q.kind==='compare'){
+      const sel = cardById(q.id).querySelector('.op.sel');
+      return !!(sel && sel.dataset.v === q.answer);
+    }
+    if(q.kind==='dualform' || q.kind==='boarddual'){
+      const a = cardById(q.id).querySelector(`input[name="${q.id}_word"]:checked`);
+      const b = cardById(q.id).querySelector(`input[name="${q.id}_exp"]:checked`);
+      const ok1 = !!(a && a.closest('.choices').dataset.answer === a.closest('.choices').dataset.answer && a.labels[0].querySelector('span:nth-child(3)').textContent === a.value);
+      // We'll simply compare values with stored correct in question object via dataset on choices
+      const okWord = !!(a && a.value === cardById(q.id).querySelectorAll('.choices[data-answer]')[0].dataset.answer);
+      const okExp  = !!(b && b.value === cardById(q.id).querySelectorAll('.choices[data-answer]')[1].dataset.answer);
+      return okWord && okExp;
+    }
+    if(q.kind==='dualc'){
+      const l = cardById(q.id).querySelector(`input[name="${q.id}_L"]:checked`);
+      const r = cardById(q.id).querySelector(`input[name="${q.id}_R"]:checked`);
+      const okL = !!(l && q.leftOptions[Number(l.value)] === cardById(q.id).querySelectorAll('.choices[data-answer]')[0].dataset.answer);
+      const okR = !!(r && q.rightOptions[Number(r.value)]=== cardById(q.id).querySelectorAll('.choices[data-answer]')[1].dataset.answer);
+      return okL && okR;
+    }
+    return false;
+  }
+
+  function markQuestion(q){
+    const card = cardById(q.id);
+    let ok=false;
+
+    if(q.kind==='mc'){
+      const ch = card.querySelector(`input[name="${q.id}"]:checked`);
+      if(ch){
+        const lbl = ch.closest('.choice');
+        if(Number(ch.value)===Number(q.answer)){ lbl.classList.add('correct'); ok=true; }
+        else { lbl.classList.add('wrong'); ch.disabled=true; lbl.classList.add('disabled'); const hint=card.querySelector('.hint'); if(hint) hint.style.display='block'; }
+      }
+    } else if(q.kind==='compare'){
+      const sel = card.querySelector('.op.sel');
+      if(sel){
+        if(sel.dataset.v===q.answer){ sel.classList.add('ok'); ok=true; }
+        else { sel.classList.add('bad'); sel.classList.remove('sel'); const hint=card.querySelector('.hint'); if(hint) hint.style.display='block'; }
+      }
+    } else if(q.kind==='dualform' || q.kind==='boarddual'){
+      const chWord = card.querySelector(`input[name="${q.id}_word"]:checked`);
+      const chExp  = card.querySelector(`input[name="${q.id}_exp"]:checked`);
+      const wordAns = card.querySelectorAll('.choices[data-answer]')[0].dataset.answer;
+      const expAns  = card.querySelectorAll('.choices[data-answer]')[1].dataset.answer;
+      if(chWord){
+        const lbl = chWord.closest('.choice');
+        if(chWord.value===wordAns){ lbl.classList.add('correct'); }
+        else { lbl.classList.add('wrong'); chWord.disabled=true; lbl.classList.add('disabled'); }
+      }
+      if(chExp){
+        const lbl = chExp.closest('.choice');
+        if(chExp.value===expAns){ lbl.classList.add('correct'); }
+        else { lbl.classList.add('wrong'); chExp.disabled=true; lbl.classList.add('disabled'); }
+      }
+      ok = isCorrect(q);
+      if(!ok){ const hint=card.querySelector('.hint'); if(hint) hint.style.display='block'; }
+    } else if(q.kind==='dualc'){
+      const groups = card.querySelectorAll('.choices[data-answer]');
+      const l = card.querySelector(`input[name="${q.id}_L"]:checked`);
+      const r = card.querySelector(`input[name="${q.id}_R"]:checked`);
+      if(l){
+        const lbl = l.closest('.choice');
+        if(q.leftOptions[Number(l.value)]===groups[0].dataset.answer){ lbl.classList.add('correct'); }
+        else { lbl.classList.add('wrong'); l.disabled=true; lbl.classList.add('disabled'); }
+      }
+      if(r){
+        const lbl = r.closest('.choice');
+        if(q.rightOptions[Number(r.value)]===groups[1].dataset.answer){ lbl.classList.add('correct'); }
+        else { lbl.classList.add('wrong'); r.disabled=true; lbl.classList.add('disabled'); }
+      }
+      ok = isCorrect(q);
+    }
+
+    if(ok) showToast();
+  }
+
+  function resetQuestion(q){
+    const card = cardById(q.id);
+    card.querySelectorAll('.choice').forEach(c=>c.classList.remove('correct','wrong','disabled'));
+    card.querySelectorAll('input[type="radio"]').forEach(r=>{ r.checked=false; r.disabled=false; });
+    card.querySelectorAll('.op').forEach(o=>o.classList.remove('sel','ok','bad'));
+    const hint = card.querySelector('.hint'); if(hint) hint.style.display='none';
+  }
+
+  // score
+  const scoreEl = document.getElementById('score');
+  function updateScore(){
+    let c=0; questions.forEach(q=>{ if(isCorrect(q)) c++; });
+    scoreEl.textContent = `النتيجة: ${A(c)} / ${A(questions.length)}`;
+  }
+  updateScore();
+
+  // button handlers
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-act]'); if(!btn) return;
+    const q = questions.find(x=>x.id===btn.dataset.qid); if(!q) return;
+    if(btn.dataset.act==='check'){ markQuestion(q); updateScore(); }
+    if(btn.dataset.act==='reset'){ resetQuestion(q); updateScore(); }
+  });
+  document.getElementById('check-all').addEventListener('click', ()=>{ questions.forEach(markQuestion); updateScore(); });
+  document.getElementById('reset-all').addEventListener('click', ()=>{ questions.forEach(resetQuestion); updateScore(); });
+</script>
+</body>
+</html>
